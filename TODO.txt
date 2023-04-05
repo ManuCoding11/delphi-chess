@@ -1,0 +1,6 @@
+/* TODO
+ * Falscher Sound bei en passent
+ * Figurenzüge
+ * Erkennung von Schach / Matt bzw. Fesselung
+ * Auto-Abort bei keiner Antwort
+ */

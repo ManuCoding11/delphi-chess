@@ -1,0 +1,9 @@
+__history/
+__history/*
+Struktogramme/
+Struktogramme/*
+
+*.dcu
+*.identcache
+*.local
+*.cfg
