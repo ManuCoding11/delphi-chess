@@ -69,6 +69,7 @@ type
     procedure reset;
 
     function currentPos: TPieceMap;
+    function getEnPTarget: TBoardCoord;
     function legalMove(fromPos, toPos: TBoardCoord): boolean;
 
     class function STARTPOS: TPieceMap;
@@ -410,6 +411,11 @@ end;
 function TBoard.currentPos: TPieceMap;
 begin
   result := position;
+end;
+
+function TBoard.getEnPTarget: TBoardCoord;
+begin
+  result := enPTarget;
 end;
 
 { Diese Prozedur dekodiert einen move-string und führt anschließend TBoard.move() aus }

@@ -508,7 +508,7 @@ end;
 procedure TForm1.BoardMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 var
-  transposed: TBoardCoord;
+  transposed, enPTarget: TBoardCoord;
   soundfile: PChar;
 begin
   transposed := TBoardCoord.null;
@@ -566,8 +566,15 @@ begin
       then soundfile := PChar('src/sfx/capture.wav')
       else soundfile := PChar('src/sfx/move-self.wav');
 
+      enPTarget := TBoardCoord.null;
+      enPTarget.setTo(GameData.Board.getEnPTarget);
+
       GameData.Board.move(SelectedPiece, transposed);
       renderPosition;
+
+      if BoardHelper.IsInBounds(enPTarget)
+      then if GameData.Board.currentPos[enPTarget.r][enPTarget.f].pieceType = empty
+        then soundfile := PChar('src/sfx/capture.wav'); 
 
       if 
       (
@@ -621,14 +628,21 @@ begin
         try
           LastMove := BoardHelper.DecodeStrMove(EngineThread.engineMove);
 
-          if GameData.Board.currentPos[LastMove[1].r][LastMove[1].f].pieceType <> empty
+          if (GameData.Board.currentPos[LastMove[1].r][LastMove[1].f].pieceType <> empty)
           then soundfile := PChar('src/sfx/capture.wav')
           else soundfile := PChar('src/sfx/move-self.wav');
 
           if GameData.Board.currentPos[transposed.r][transposed.f].color = GameData.Board.currentPos[LastMove[0].r][LastMove[0].f].color
           then raise InvalidMoveException.Create('Engine has played an illegal move.');
 
+          enPTarget := TBoardCoord.null;
+          enPTarget.setTo(GameData.board.getEnPTarget);
+
           GameData.Board.moveString(EngineThread.engineMove);
+
+          if BoardHelper.IsInBounds(enPTarget)
+          then if GameData.Board.currentPos[enPTarget.r][enPTarget.f].pieceType = empty
+            then soundfile := PChar('src/sfx/capture.wav');
 
           sleep(200);
           renderPosition;
