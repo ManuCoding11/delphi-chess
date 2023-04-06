@@ -547,7 +547,7 @@ begin
       then begin
         SelectedPiece.setTo(transposed);
 
-        if length(LastMove) > 0
+        if length(LastMove) >= 2
         then begin
           renderSelectedBlue(LastMove[0]);
           renderSelectedBlue(LastMove[1]);
@@ -588,9 +588,15 @@ begin
         renderUpdated(TBoardCoord.Create(8, 8));
       end;
 
-      SetLength(LastMove, 2);
-      LastMove[0] := transposed;
-      LastMove[1] := SelectedPiece;
+      if length(LastMove) < 2
+      then begin
+        SetLength(LastMove, 2);
+        LastMove[0] := TBoardCoord.null;
+        LastMove[1] := TBoardCoord.null;
+      end;
+      
+      LastMove[0].setTo(transposed);
+      LastMove[1].setTo(SelectedPiece);
 
       renderSelectedBlue(LastMove[0]);
       renderSelectedBlue(LastMove[1]);
@@ -654,7 +660,7 @@ begin
 
       SelectedPiece.setTo(transposed);
 
-      if length(LastMove) > 0
+      if length(LastMove) >= 2
       then begin
         renderSelectedBlue(LastMove[0]);
         renderSelectedBlue(LastMove[1]);
@@ -669,7 +675,7 @@ begin
 
       SelectedPiece.setTo(TBoardCoord.null);
 
-      if length(LastMove) > 0
+      if length(LastMove) >= 2
       then begin
         renderSelectedBlue(LastMove[0]);
         renderSelectedBlue(LastMove[1]);
