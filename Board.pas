@@ -649,6 +649,9 @@ begin
   if length(move) < 4
   then exit;
 
+  if (ord(move[2]) < 49) or (ord(move[2]) > 56) or (ord(move[4]) < 49) or (ord(move[4]) > 56)
+  then exit;
+
   tryAppendCoord(result, TBoardCoord.Create(Ord(move[1]) - 96, StrToInt(move[2])));
   tryAppendCoord(result, TBoardCoord.Create(Ord(move[3]) - 96, StrToInt(move[4])));
 end;

@@ -31,29 +31,67 @@ type
 
   // Eigener Nebenthread, in dem Kommunikation mit der Anwendung stattfindet.
   TEngineThread = class(TThread)
-    public
-      // asynchron geupdatetes Feld
-      // enthält den finalen Zug der Engine als movestring
-      engineMove: string;
+  public
+    // asynchron geupdatetes Feld
+    // enthält den finalen Zug der Engine als movestring
+    engineMove: string;
 
-      // Startet eine neue Instanz des Threads
-      constructor Create(engine: TEngineData; move: string);
+    done: boolean;
 
-    protected
-      // Informationen über die Engine und Zugriff auf die Pipe-Handles
-      EngineData: TEngineData;
+    // Startet eine neue Instanz des Threads
+    constructor Create(engine: TEngineData; move: string);
 
-      // Die aktuelle Stellung der Figuren als absoluter movestring
-      movestring: string;
+  protected
+    // Informationen über die Engine und Zugriff auf die Pipe-Handles
+    EngineData: TEngineData;
 
-      // Ablaufprozedur des Threads, die asynchron ausgeführt wird
-      procedure Execute; override;
+    // Die aktuelle Stellung der Figuren als absoluter movestring
+    movestring: string;
+
+    // Ablaufprozedur des Threads, die asynchron ausgeführt wird
+    procedure Execute; override;
+  end;
+
+  // Eigener Nebenthread, der den übergebenen Prozess nach
+  // 10 Sekunden ohne Antwort automatisch beendet
+  TAsyncTerminate = class(TThread)
+  public
+    constructor Create(thread: TEngineThread; time: cardinal);
+
+  protected
+    endableThread: TEngineThread;
+
+    procedure Execute; override;
   end;
 
 var
   f: TFileStream;
 
 implementation
+
+constructor TAsyncTerminate.Create(thread: TEngineThread; time: cardinal);
+begin
+  inherited Create(false);
+  endableThread := thread;
+end;
+
+procedure TAsyncTerminate.Execute;
+var startTime: Cardinal;
+begin
+  startTime := GetTickCount;
+
+  while GetTickCount - startTime < time do
+  begin
+    if endableThread.done
+    then exit;
+
+    sleep(100);
+  end;
+
+  TerminateThread(endableThread.Handle, 1);
+  raise Exception.Create('Engine Thread is not responding.');
+end;
+
 
 constructor TEngineThread.Create(engine: TEngineData; move: string);
 begin
@@ -63,6 +101,7 @@ begin
   EngineData := engine;
   movestring := move;
   engineMove := '';
+  done := false;
 end;
 
 procedure TEngineThread.Execute;
@@ -76,6 +115,7 @@ var
 begin
   if EngineData.is_started
   then begin
+
     bytesWritten := 0;
     bytesRead := 0;
 
@@ -128,9 +168,12 @@ begin
     in_msg := #10;
     f.Write(in_msg[1], length(in_msg) * sizeof(char));
 
-    for i := 10 to 14 do
-      engineMove := engineMove + out_msg[i];
+    for i := 10 to 15 do
+      if out_msg[i] <> ' '
+      then engineMove := engineMove + out_msg[i];
   end;
+
+  done := true;
 end;
 
 
